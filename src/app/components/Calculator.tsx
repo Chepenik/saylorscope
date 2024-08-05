@@ -168,6 +168,7 @@ const Calculator = () => {
     }
   };
 
+  const isDataEmpty = assets.length === 1 && !assets[0].name && !assets[0].value && !assets[0].maintenance && !assets[0].appreciation;
 
   return (
     <div className="calculator min-h-screen p-8 bg-gradient-to-br from-gray-100 via-gray-900 to-emerald-500">
@@ -255,18 +256,21 @@ const Calculator = () => {
         <button
           className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700 transition duration-300"
           onClick={addAsset}
+          disabled={isDataEmpty}
         >
           Add Another Asset
         </button>
         <button
           className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700 transition duration-300"
           onClick={calculateAndCompare}
+          disabled={isDataEmpty}
         >
           Calculate and Compare
         </button>
         <button
             className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
             onClick={clearAllData}
+            disabled={isDataEmpty}
           >
           Clear All Data
         </button>
