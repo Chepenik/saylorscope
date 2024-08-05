@@ -157,6 +157,18 @@ const Calculator = () => {
     }
   };
 
+  const clearAllData = () => {
+    setAssets([{ name: '', value: null, maintenance: null, appreciation: null, type: 'physical' }]);
+    setAssetCount(1);
+    setResultHTML('');
+    localStorage.removeItem('savedAssets');
+    if (chartRef.current) {
+      chartRef.current.destroy();
+      chartRef.current = null;
+    }
+  };
+
+
   return (
     <div className="calculator min-h-screen p-8 bg-gradient-to-br from-gray-100 via-gray-900 to-emerald-500">
       <div className="max-w-4xl mx-auto bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-2xl">
@@ -251,6 +263,12 @@ const Calculator = () => {
           onClick={calculateAndCompare}
         >
           Calculate and Compare
+        </button>
+        <button
+            className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
+            onClick={clearAllData}
+          >
+          Clear All Data
         </button>
         <div className="result mt-8 p-4 bg-white rounded-lg shadow-md" dangerouslySetInnerHTML={{ __html: resultHTML }}></div>
         <canvas className="mt-8" id="comparisonChart" ref={chartCanvasRef}></canvas>
