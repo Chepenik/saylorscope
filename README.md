@@ -2,7 +2,7 @@
 
 SaylorScope is a premier calculator designed for Bitcoin-focused financial analysis and wealth building, inspired by Michael Saylor's principles and the "First Law of Money."
 
-![First Law of Money]('/inspiration.jpg')
+![First Law of Money](public/inspiration.jpg)
 
 ## Getting Started
 
