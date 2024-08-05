@@ -37,17 +37,20 @@ Editing the Project
 You can start editing the page by modifying app/page.tsx. The page auto-updates as you edit the file.
 
 Features
+
 Calculates the lifespan, ROI, and time it takes to double your money for various asset types.
 Visual representation of the initial and projected values using Chart.js.
 Supports physical, digital, and financial assets.
 Tip button to support the project.
 
 Deploy on Vercel
+
 The easiest way to deploy your Next.js app is to use the Vercel Platform from the creators of Next.js: https://github.com/vercel/next.js/
 
 Check out the Next.js deployment documentation for more details.
 
 Future Work
+
 Enhancements I'd like to build for SaylorScope:
 
 Optimize for Mobile: Ensure the application is fully responsive and optimized for mobile devices.
@@ -58,7 +61,9 @@ Additional Financial Metrics: Add more advanced financial metrics and analysis t
 Export Options: Provide options to export analysis results in various formats (PDF, Excel, etc.).
 
 License
+
 This project is licensed under the MIT License - see the LICENSE file for details. Please feel free to make a pull request and contribute if you have ideas to improve SaylorScope
 
 Acknowledgments
+
 This project was inspired by Michael Saylor's presentation at the 2024 Bitcoin Conference in Nashville.
