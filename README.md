@@ -1,6 +1,6 @@
 # SaylorScope: Advanced Financial Analysis Tool
 
-SaylorScope is a premier calculator designed for Bitcoin-focused financial analysis and wealth building, inspired by Michael Saylor's principles and the "First Law of Money."
+SaylorScope is a premier calculator for figuring out the first law of money. It is designed to help with financial analysis and wealth building, inspired by Michael Saylor\'s speech at the 2024 Bitcoin Conference in Nashville.
 
 ![First Law of Money](public/inspiration.jpg)
 
@@ -31,6 +31,7 @@ pnpm dev
 # or
 bun dev
 Open http://localhost:3000 with your browser to see the result.
+```
 
 Editing the Project
 You can start editing the page by modifying app/page.tsx. The page auto-updates as you edit the file.
@@ -40,20 +41,24 @@ Calculates the lifespan, ROI, and time it takes to double your money for various
 Visual representation of the initial and projected values using Chart.js.
 Supports physical, digital, and financial assets.
 Tip button to support the project.
-Learn More
-To learn more about Next.js, take a look at the following resources:
-
-Next.js Documentation - Learn about Next.js features and API.
-Learn Next.js - An interactive Next.js tutorial.
-You can check out the Next.js GitHub repository - your feedback and contributions are welcome!
 
 Deploy on Vercel
-The easiest way to deploy your Next.js app is to use the Vercel Platform from the creators of Next.js.
+The easiest way to deploy your Next.js app is to use the Vercel Platform from the creators of Next.js: https://github.com/vercel/next.js/
 
 Check out the Next.js deployment documentation for more details.
 
+Future Work
+Enhancements I'd like to build for SaylorScope:
+
+Optimize for Mobile: Ensure the application is fully responsive and optimized for mobile devices.
+Add a Database: Integrate a database to store user data, asset information, and analysis results.
+User Authentication: Implement a login system for users to save and manage their assets and analysis over multiple sessions.
+Improve UX: Continuously improve the user experience with a more intuitive interface and better feedback mechanisms.
+Additional Financial Metrics: Add more advanced financial metrics and analysis tools to provide deeper insights.
+Export Options: Provide options to export analysis results in various formats (PDF, Excel, etc.).
+
 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details. Please feel free to make a pull request and contribute if you have ideas to improve SaylorScope
 
 Acknowledgments
 This project was inspired by Michael Saylor's presentation at the 2024 Bitcoin Conference in Nashville.
