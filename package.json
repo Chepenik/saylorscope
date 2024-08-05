@@ -9,12 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@eslint/config-array": "^0.17.1",
+    "@eslint/object-schema": "^2.1.4",
     "@types/chart.js": "^2.9.41",
     "chart.js": "^4.4.3",
+    "glob": "^11.0.0",
+    "inflight": "^1.0.6",
     "lucide-react": "^0.424.0",
     "next": "14.2.5",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "rimraf": "^6.0.1"
   },
   "devDependencies": {
     "@types/node": "^20",
