@@ -14,6 +14,7 @@ interface AssetInputFormProps {
   index: number;
   onChange: (index: number, field: keyof Asset, value: string | number | null) => void;
   onAIEstimate: (index: number, field: 'maintenance' | 'appreciation') => Promise<void>;
+  isLoading: boolean; 
 }
 
 const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange, onAIEstimate }) => {
