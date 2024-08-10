@@ -34,13 +34,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               ? 'Monthly maintenance cost (in USD)' 
               : 'Annual appreciation rate (as a percentage)'}
             
-            If you can provide a numeric estimate, format your response as a JSON object with two keys: "value" (the numeric estimate) and "explanation" (a brief explanation of the estimate).
-            
-            If you cannot provide a specific numeric estimate, format your response as a JSON object with two keys: "value" (set to null) and "explanation" (a detailed explanation of why a specific estimate can't be provided and what factors influence this asset's ${estimationType}).
+            Always try to provide a numeric estimate or range. If the asset is volatile or speculative, give a reasonable range based on historical data or expert predictions.
+
+            Format your response as a JSON object with three keys: 
+            "value" (a single numeric estimate or the midpoint of a range), 
+            "range" (an array with two numbers representing the low and high estimates, or null if not applicable), 
+            and "explanation" (a brief explanation of the estimate or range).
             
             Example responses:
-            {"value": 500, "explanation": "Based on average maintenance costs for similar assets."}
-            {"value": null, "explanation": "It's difficult to estimate the appreciation rate for Bitcoin due to its high volatility. Factors influencing its value include market demand, regulatory changes, and technological advancements."}
+            {"value": 500, "range": null, "explanation": "Based on average maintenance costs for similar assets."}
+            {"value": 25, "range": [-50, 100], "explanation": "Bitcoin's annual appreciation rate is highly volatile. Historical data suggests a range of -50% to 100% annual growth, with 25% as a midpoint estimate."}
+            {"value": null, "range": null, "explanation": "Cannot provide an estimate for 'Food' as an asset. Food is typically a consumable item, not an investment asset."}
             `
           }
         ],
@@ -60,6 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({
       [estimationType]: estimatedData.value,
+      range: estimatedData.range,
       explanation: estimatedData.explanation
     });
   } catch (error) {

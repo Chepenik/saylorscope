@@ -4,6 +4,7 @@ interface EstimatedAssetDetails {
   maintenance: number | null;
   appreciation: number | null;
   explanation: string;
+  range?: [number, number]; // Adding the optional range property
 }
 
 export async function estimateAssetDetails(
@@ -25,7 +26,8 @@ export async function estimateAssetDetails(
     return {
       maintenance: estimationType === 'maintenance' ? response.data.maintenance : null,
       appreciation: estimationType === 'appreciation' ? response.data.appreciation : null,
-      explanation: response.data.explanation
+      explanation: response.data.explanation,
+      range: response.data.range // Include range if it exists in the response
     };
   } catch (error) {
     console.error('Error fetching asset estimation:', error);
