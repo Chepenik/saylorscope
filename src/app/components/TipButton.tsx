@@ -22,7 +22,7 @@ const TipButton: React.FC = () => {
         className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-3 px-6 rounded-lg font-bold shadow-lg hover:from-yellow-500 hover:to-orange-600 transition duration-300 transform hover:scale-105"
         onClick={openModal}
       >
-        Got value? Consider tipping some sats ⚡
+        Zap me ⚡
       </button>
       
       {isModalOpen && (

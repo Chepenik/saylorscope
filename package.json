@@ -11,7 +11,9 @@
   "dependencies": {
     "@eslint/config-array": "0.17.1",
     "@eslint/object-schema": "2.1.4",
+    "@headlessui/react": "^2.1.2",
     "@types/chart.js": "2.9.41",
+    "axios": "^1.7.3",
     "chart.js": "4.4.3",
     "glob": "11.0.0",
     "inflight": "1.0.6",

@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Chart from 'chart.js/auto';
+import AssetInputForm from './AssetInputForm';
+import { estimateAssetDetails } from '../utils/assetEstimation';
+import Modal from './Modal';
 
 interface Asset {
   name: string;
   value: number | null;
   maintenance: number | null;
   appreciation: number | null;
-  type: 'physical' | 'digital' | 'financial';
+  type: 'physical' | 'digital' | 'financial' | '';
   lifespan?: string;
   roi?: string;
   doubleYourMoneyTime?: string;
@@ -17,12 +20,14 @@ interface Asset {
   annualReturn?: string;
 }
 
-const Calculator = () => {
+const Calculator: React.FC = () => {
   const [assetCount, setAssetCount] = useState(1);
   const [assets, setAssets] = useState<Asset[]>([
-    { name: '', value: null, maintenance: null, appreciation: null, type: 'physical' },
+    { name: '', value: null, maintenance: null, appreciation: null, type: '' },
   ]);
   const [resultHTML, setResultHTML] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [modalContent, setModalContent] = useState<string | null>(null);
   const chartRef = useRef<Chart | null>(null);
   const chartCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -42,29 +47,67 @@ const Calculator = () => {
     setAssetCount(assetCount + 1);
     setAssets([
       ...assets,
-      { name: '', value: null, maintenance: null, appreciation: null, type: 'physical' },
+      { name: '', value: null, maintenance: null, appreciation: null, type: '' },
     ]);
   };
 
-  const handleChange = (index: number, field: keyof Asset, value: string | number) => {
+  const handleChange = (index: number, field: keyof Asset, value: string | number | null) => {
     const newAssets = [...assets];
     if (field === 'name') {
       newAssets[index].name = value as string;
     } else if (field === 'type') {
-      newAssets[index].type = value as 'physical' | 'digital' | 'financial';
-    } else {
-      const numValue = typeof value === 'string' ? parseFloat(value) : value;
-      if (!isNaN(numValue)) {
-        if (field === 'value' && numValue >= 0) {
-          newAssets[index][field] = numValue;
-        } else if (field === 'maintenance' && numValue >= 0) {
-          newAssets[index][field] = numValue;
-        } else if (field === 'appreciation') {
-          newAssets[index][field] = numValue;
+      newAssets[index].type = value as 'physical' | 'digital' | 'financial' | '';
+    } else if (field === 'value' || field === 'maintenance' || field === 'appreciation') {
+      if (value === null) {
+        newAssets[index][field] = null;
+      } else {
+        const numValue = typeof value === 'string' ? parseFloat(value) : value;
+        if (!isNaN(numValue)) {
+          if (field === 'value' && numValue >= 0) {
+            newAssets[index][field] = numValue;
+          } else if (field === 'maintenance' && numValue >= 0) {
+            newAssets[index][field] = numValue;
+          } else if (field === 'appreciation') {
+            newAssets[index][field] = numValue;
+          }
         }
       }
     }
     setAssets(newAssets);
+  };
+
+  const handleAIEstimate = async (index: number, estimationType: 'maintenance' | 'appreciation') => {
+    const asset = assets[index];
+    if (!asset.type || !asset.name || asset.value === null) {
+      alert("Please fill out all required fields: Asset Type, Asset Name, and Asset Value. The more detailed information you provide, the more accurate our AI estimation will be. For best results, be as specific as possible when describing your asset.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const estimatedDetails = await estimateAssetDetails(asset.name, asset.type, estimationType);
+      
+      const newAssets = [...assets];
+      newAssets[index] = {
+        ...asset,
+        [estimationType]: estimatedDetails[estimationType],
+      };
+      setAssets(newAssets);
+  
+      setModalContent(`Estimated ${estimationType} for ${asset.name} (${asset.type}): 
+        ${estimatedDetails[estimationType] !== null 
+          ? `${estimationType === 'maintenance' 
+              ? `$${estimatedDetails[estimationType]} per month` 
+              : `${estimatedDetails[estimationType]}% per year`}`
+          : 'Unable to provide a specific estimate'}
+        
+        Explanation: ${estimatedDetails.explanation}`);
+    } catch (error) {
+      console.error('Error estimating asset details:', error);
+      setModalContent(`Error: ${error instanceof Error ? error.message : 'An unexpected error occurred while estimating asset details. Please try again.'}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const calculateAndCompare = () => {
@@ -175,83 +218,16 @@ const Calculator = () => {
       <div className="max-w-4xl mx-auto bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-2xl">
         <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">SaylorScope</h1>
         <div id="assetInputs" className="space-y-6">
-        {assets.map((asset, index) => (
-          <div key={index} className="p-4 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">Asset {index + 1}</h2>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor={`asset-name-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  Asset Name
-                </label>
-                <input
-                  id={`asset-name-${index}`}
-                  type="text"
-                  placeholder="e.g., Bitcoin, Real Estate, Stocks"
-                  value={asset.name}
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                  onChange={e => handleChange(index, 'name', e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor={`asset-value-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  Value of Asset ($)
-                </label>
-                <input
-                  id={`asset-value-${index}`}
-                  type="number"
-                  placeholder="Enter asset value"
-                  value={asset.value === null ? '' : asset.value}
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                  onChange={e => handleChange(index, 'value', e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor={`asset-maintenance-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  Monthly Maintenance Cost ($)
-                </label>
-                <input
-                  id={`asset-maintenance-${index}`}
-                  type="number"
-                  placeholder="Enter monthly cost"
-                  value={asset.maintenance === null ? '' : asset.maintenance}
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                  onChange={e => handleChange(index, 'maintenance', e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor={`asset-appreciation-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  Annual Appreciation Rate (%)
-                </label>
-                <div className="relative">
-                  <input
-                    id={`asset-appreciation-${index}`}
-                    type="number"
-                    placeholder="Enter annual rate"
-                    value={asset.appreciation === null ? '' : asset.appreciation}
-                    className="w-full p-2 pr-8 border border-gray-300 rounded text-black"
-                    onChange={e => handleChange(index, 'appreciation', e.target.value)}
-                  />
-                  <span className="absolute right-3 top-2 text-gray-600">%</span>
-                </div>
-              </div>
-              <div>
-                <label htmlFor={`asset-type-${index}`} className="block text-sm font-medium text-gray-700 mb-1">
-                  Asset Type
-                </label>
-                <select
-                  id={`asset-type-${index}`}
-                  className="w-full p-2 border border-gray-300 rounded text-black"
-                  value={asset.type}
-                  onChange={e => handleChange(index, 'type', e.target.value)}
-                >
-                  <option value="physical">Physical Asset</option>
-                  <option value="digital">Digital Asset</option>
-                  <option value="financial">Financial Asset</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        ))}
+          {assets.map((asset, index) => (
+            <AssetInputForm
+              key={index}
+              asset={asset}
+              index={index}
+              onChange={handleChange}
+              onAIEstimate={handleAIEstimate}
+              isLoading={isLoading}
+            />
+          ))}
         </div>
         <button
           className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700 transition duration-300"
@@ -268,15 +244,20 @@ const Calculator = () => {
           Calculate and Compare
         </button>
         <button
-            className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
-            onClick={clearAllData}
-            disabled={isDataEmpty}
-          >
+          className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
+          onClick={clearAllData}
+          disabled={isDataEmpty}
+        >
           Clear All Data
         </button>
         <div className="result mt-8 p-4 bg-white rounded-lg shadow-md" dangerouslySetInnerHTML={{ __html: resultHTML }}></div>
         <canvas className="mt-8" id="comparisonChart" ref={chartCanvasRef}></canvas>
       </div>
+      {modalContent && (
+        <Modal onClose={() => setModalContent(null)}>
+          <p>{modalContent}</p>
+        </Modal>
+      )}
     </div>
   );
 };

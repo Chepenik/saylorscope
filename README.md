@@ -59,6 +59,7 @@ User Authentication: Implement a login system for users to save and manage their
 Improve UX: Continuously improve the user experience with a more intuitive interface and better feedback mechanisms.
 Additional Financial Metrics: Add more advanced financial metrics and analysis tools to provide deeper insights.
 Export Options: Provide options to export analysis results in various formats (PDF, Excel, etc.).
+Make a paid version with access to the internet that prepopulates the data and fetches it from yahoo finance, etc, offer best estimates
 
 License
 
