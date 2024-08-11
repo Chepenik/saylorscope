@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { AssetsProvider } from './components/AssetsContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   keywords: ['Bitcoin', 'financial analysis', 'wealth building', 'Michael Saylor', 'cryptocurrency', 'digital assets'],
   openGraph: {
     title: 'SaylorScope - Advanced Financial Analysis Tool',
-    description: 'Premier calculator for Bitcoin-focused financial analysis and wealth building',
+    description: 'Premier calculator for Bitcoin and other asset focused financial analysis and wealth building',
     type: 'website',
     url: 'https://saylorscope.com', 
     images: [
@@ -26,12 +27,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <AssetsProvider>
+        <body className={inter.className}>{children}</body>
+      </AssetsProvider>
     </html>
   );
 }

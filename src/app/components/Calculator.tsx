@@ -1,117 +1,69 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import Chart from 'chart.js/auto';
 import AssetInputForm from './AssetInputForm';
 import { estimateAssetDetails } from '../utils/assetEstimation';
 import Modal from './Modal';
-
-interface Asset {
-  name: string;
-  value: number | null;
-  maintenance: number | null;
-  appreciation: number | null;
-  type: 'physical' | 'digital' | 'financial' | '';
-  lifespan?: string;
-  roi?: string;
-  doubleYourMoneyTime?: string;
-  projectedValue?: string;
-  annualCost?: string;
-  annualReturn?: string;
-}
+import { useAssets } from './AssetsContext';
+import { Asset, AssetWithCalculations } from '../../types/asset';
 
 const Calculator: React.FC = () => {
-  const [assetCount, setAssetCount] = useState(1);
-  const [assets, setAssets] = useState<Asset[]>([
-    { name: '', value: null, maintenance: null, appreciation: null, type: '' },
-  ]);
+  const { assets, addAsset, updateAsset, clearAllAssets, isAnyAILoading, setIsAnyAILoading } = useAssets();
   const [resultHTML, setResultHTML] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<string | null>(null);
   const chartRef = useRef<Chart | null>(null);
   const chartCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    const savedAssets = localStorage.getItem('savedAssets');
-    if (savedAssets) {
-      setAssets(JSON.parse(savedAssets));
-      setAssetCount(JSON.parse(savedAssets).length);
-    }
-  }, []);
+  const handleChange = useCallback((index: number, field: keyof Asset, value: string | number | null) => {
+    updateAsset(index, field, value);
+  }, [updateAsset]);
 
-  useEffect(() => {
-    localStorage.setItem('savedAssets', JSON.stringify(assets));
-  }, [assets]);
-
-  const addAsset = () => {
-    setAssetCount(assetCount + 1);
-    setAssets([
-      ...assets,
-      { name: '', value: null, maintenance: null, appreciation: null, type: '' },
-    ]);
-  };
-
-  const handleChange = (index: number, field: keyof Asset, value: string | number | null) => {
-    const newAssets = [...assets];
-    if (field === 'name') {
-      newAssets[index].name = value as string;
-    } else if (field === 'type') {
-      newAssets[index].type = value as 'physical' | 'digital' | 'financial' | '';
-    } else if (field === 'value' || field === 'maintenance' || field === 'appreciation') {
-      if (value === null) {
-        newAssets[index][field] = null;
-      } else {
-        const numValue = typeof value === 'string' ? parseFloat(value) : value;
-        if (!isNaN(numValue)) {
-          if (field === 'value' && numValue >= 0) {
-            newAssets[index][field] = numValue;
-          } else if (field === 'maintenance' && numValue >= 0) {
-            newAssets[index][field] = numValue;
-          } else if (field === 'appreciation') {
-            newAssets[index][field] = numValue;
-          }
-        }
-      }
-    }
-    setAssets(newAssets);
-  };
-
-  const handleAIEstimate = async (index: number, estimationType: 'maintenance' | 'appreciation') => {
+  const handleAIEstimate = useCallback(async (index: number, estimationType: 'maintenance' | 'appreciation') => {
     const asset = assets[index];
     if (!asset.type || !asset.name || asset.value === null) {
       alert("Please fill out all required fields: Asset Type, Asset Name, and Asset Value. The more detailed information you provide, the more accurate our AI estimation will be. For best results, be as specific as possible when describing your asset.");
       return;
     }
 
-    setIsLoading(true);
+    setIsAnyAILoading(true);
     try {
       const estimatedDetails = await estimateAssetDetails(asset.name, asset.type, estimationType);
       
-      const newAssets = [...assets];
-      newAssets[index] = {
-        ...asset,
-        [estimationType]: estimatedDetails[estimationType],
-      };
-      setAssets(newAssets);
+      updateAsset(index, estimationType, estimatedDetails[estimationType]);
   
-      setModalContent(`Estimated ${estimationType} for ${asset.name} (${asset.type}): 
-        ${estimatedDetails[estimationType] !== null 
-          ? `${estimationType === 'maintenance' 
-              ? `$${estimatedDetails[estimationType]} per month` 
-              : `${estimatedDetails[estimationType]}% per year`}`
-          : 'Unable to provide a specific estimate'}
-        
-        Explanation: ${estimatedDetails.explanation}`);
+      let estimateValue = 'Unable to provide a specific estimate';
+      if (estimatedDetails[estimationType] !== null) {
+        estimateValue = estimationType === 'maintenance'
+          ? `$${estimatedDetails[estimationType]} per month`
+          : `${estimatedDetails[estimationType]}% per year`;
+      }
+
+      let modalContent = `Estimated ${estimationType} for ${asset.name} (${asset.type}):\n${estimateValue}\n\n`;
+      modalContent += `Explanation: ${estimatedDetails.explanation}`;
+
+      if (estimatedDetails.range) {
+        modalContent += `\n\nEstimated range: ${estimatedDetails.range[0]} to ${estimatedDetails.range[1]}`;
+      }
+
+      setModalContent(modalContent);
     } catch (error) {
       console.error('Error estimating asset details:', error);
-      setModalContent(`Error: ${error instanceof Error ? error.message : 'An unexpected error occurred while estimating asset details. Please try again.'}`);
+      let errorMessage = 'An unexpected error occurred while estimating asset details. Please try again.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      if (typeof error === 'object' && error !== null && 'rawResponse' in error) {
+        errorMessage += `\n\nRaw AI response: ${(error as any).rawResponse}`;
+      }
+      setModalContent(`Error: ${errorMessage}`);
     } finally {
-      setIsLoading(false);
+      setIsAnyAILoading(false);
     }
-  };
+  }, [assets, updateAsset, setIsAnyAILoading]);
 
-  const calculateAndCompare = () => {
-    const results = assets.map(asset => {
+  const calculateAndCompare = useCallback(() => {
+    const results: AssetWithCalculations[] = assets.map(asset => {
       const value = asset.value ?? 0;
       const maintenance = asset.maintenance ?? 0;
       const appreciation = asset.appreciation ?? 0;
@@ -198,18 +150,7 @@ const Calculator: React.FC = () => {
         },
       });
     }
-  };
-
-  const clearAllData = () => {
-    setAssets([{ name: '', value: null, maintenance: null, appreciation: null, type: 'physical' }]);
-    setAssetCount(1);
-    setResultHTML('');
-    localStorage.removeItem('savedAssets');
-    if (chartRef.current) {
-      chartRef.current.destroy();
-      chartRef.current = null;
-    }
-  };
+  }, [assets]);
 
   const isDataEmpty = assets.length === 1 && !assets[0].name && !assets[0].value && !assets[0].maintenance && !assets[0].appreciation;
 
@@ -225,28 +166,28 @@ const Calculator: React.FC = () => {
               index={index}
               onChange={handleChange}
               onAIEstimate={handleAIEstimate}
-              isLoading={isLoading}
+              isAnyAILoading={isAnyAILoading}
             />
           ))}
         </div>
         <button
           className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700 transition duration-300"
           onClick={addAsset}
-          disabled={isDataEmpty}
+          disabled={isDataEmpty || isAnyAILoading}
         >
           Add Another Asset
         </button>
         <button
           className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700 transition duration-300"
           onClick={calculateAndCompare}
-          disabled={isDataEmpty}
+          disabled={isDataEmpty || isAnyAILoading}
         >
           Calculate and Compare
         </button>
         <button
           className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
-          onClick={clearAllData}
-          disabled={isDataEmpty}
+          onClick={clearAllAssets}
+          disabled={isDataEmpty || isAnyAILoading}
         >
           Clear All Data
         </button>

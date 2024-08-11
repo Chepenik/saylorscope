@@ -14,10 +14,10 @@ interface AssetInputFormProps {
   index: number;
   onChange: (index: number, field: keyof Asset, value: string | number | null) => void;
   onAIEstimate: (index: number, field: 'maintenance' | 'appreciation') => Promise<void>;
-  isLoading: boolean; 
+  isAnyAILoading: boolean;
 }
 
-const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange, onAIEstimate }) => {
+const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange, onAIEstimate, isAnyAILoading }) => {
   const [loadingButton, setLoadingButton] = useState<'maintenance' | 'appreciation' | null>(null);
 
   const handleNumberChange = (field: 'value' | 'maintenance' | 'appreciation', value: string) => {
@@ -37,7 +37,7 @@ const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange,
         value={asset.type}
         onChange={(e) => onChange(index, 'type', e.target.value as Asset['type'])}
         className="w-full mb-2 p-2 border border-gray-300 rounded text-black"
-        disabled={!!loadingButton} // Disable when loading
+        disabled={isAnyAILoading}
       >
         <option value="" disabled>Select Asset Type</option>
         <option value="physical">Physical Asset</option>
@@ -50,7 +50,7 @@ const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange,
         value={asset.name}
         onChange={(e) => onChange(index, 'name', e.target.value)}
         className="w-full p-2 mb-2 border border-gray-300 rounded text-black"
-        disabled={!!loadingButton} // Disable when loading
+        disabled={isAnyAILoading}
       />
       <input
         type="number"
@@ -58,7 +58,7 @@ const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange,
         value={asset.value === null ? '' : asset.value}
         onChange={(e) => handleNumberChange('value', e.target.value)}
         className="w-full p-2 mb-2 border border-gray-300 rounded text-black"
-        disabled={!!loadingButton} // Disable when loading
+        disabled={isAnyAILoading}
       />
       <div className="flex items-center space-x-2 mb-2">
         <input
@@ -67,24 +67,24 @@ const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange,
           value={asset.maintenance === null ? '' : asset.maintenance}
           onChange={(e) => handleNumberChange('maintenance', e.target.value)}
           className="flex-grow p-2 border border-gray-300 rounded text-black"
-          disabled={!!loadingButton} // Disable when loading
+          disabled={isAnyAILoading}
         />
         <AIEstimationButton
           onEstimate={() => handleAIEstimation('maintenance')}
           isLoading={loadingButton === 'maintenance'}
           estimationType="maintenance"
-          disabled={!!loadingButton && loadingButton !== 'maintenance'} // Disable other buttons
+          disabled={isAnyAILoading}
         />
       </div>
       <div className="flex items-center space-x-2 mb-2">
         <div className="relative flex-grow">
           <input
             type="number"
-            placeholder="Enter annual rate"
+            placeholder="Enter annual appreciation/depreciation rate"
             value={asset.appreciation === null ? '' : asset.appreciation}
             onChange={(e) => handleNumberChange('appreciation', e.target.value)}
             className="w-full p-2 pr-8 border border-gray-300 rounded text-black"
-            disabled={!!loadingButton} // Disable when loading
+            disabled={isAnyAILoading}
           />
           <span className="absolute right-3 top-2 text-gray-600">%</span>
         </div>
@@ -92,7 +92,7 @@ const AssetInputForm: React.FC<AssetInputFormProps> = ({ asset, index, onChange,
           onEstimate={() => handleAIEstimation('appreciation')}
           isLoading={loadingButton === 'appreciation'}
           estimationType="appreciation"
-          disabled={!!loadingButton && loadingButton !== 'appreciation'} // Disable other buttons
+          disabled={isAnyAILoading}
         />
       </div>
     </div>
