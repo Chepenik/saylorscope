@@ -13,7 +13,7 @@ const Header = () => (
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-800 to-emerald-600">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-800 to-emerald-500">
       <main className="container mx-auto px-4 py-8">
         <Header />
         <div className="max-w-4xl mx-auto">
