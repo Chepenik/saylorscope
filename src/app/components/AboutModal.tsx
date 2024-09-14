@@ -4,10 +4,17 @@ import { X } from 'lucide-react';
 interface AboutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenTipModal: () => void;
 }
 
-const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
+const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, onOpenTipModal }) => {
   if (!isOpen) return null;
+
+  const handleTipButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onOpenTipModal();
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -36,7 +43,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             As an open-source project, we encourage you to hack, build upon, and improve SaylorScope. Your contributions can help make this tool even more valuable for the community.
           </p>
           <p>
-            If you find SaylorScope useful, consider supporting its development by using the &quot;Zap Me&quot; button in the header. Your sats help us maintain and improve the tool. Remember, every sat counts!
+            If you find SaylorScope useful, consider supporting its development by using the <a href="#" onClick={handleTipButtonClick} className="text-blue-400 hover:text-blue-300 underline">&quot;Zap Me&quot;</a> button in the header. Your sats help us maintain and improve the tool. Remember, every sat counts!
           </p>
           <p className="font-semibold">
             We love Bitcoin and believe in its potential to change the world. By providing tools like SaylorScope, we hope to contribute to a future of sound money and financial sovereignty.

@@ -21,13 +21,18 @@ const Chart: React.FC<ChartProps> = ({ assets, colors }) => {
     plugins: {
       legend: {
         position: 'top' as const,
-        labels: { color: 'white' },
+        labels: { 
+          color: 'white',
+          font: {
+            size: 10 // Smaller font size for mobile
+          }
+        },
       },
       title: {
         display: true,
         text: '5-Year Value Forecast',
         color: 'white',
-        font: { size: 20 },
+        font: { size: 14 }, // Smaller font size for mobile
       },
       tooltip: {
         enabled: true,
@@ -40,16 +45,29 @@ const Chart: React.FC<ChartProps> = ({ assets, colors }) => {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { color: 'white' },
+        ticks: { 
+          color: 'white',
+          font: {
+            size: 10 // Smaller font size for mobile
+          }
+        },
         grid: { color: 'rgba(255, 255, 255, 0.1)' },
         title: {
           display: true,
           text: 'Value ($)',
           color: 'white',
+          font: {
+            size: 12 // Smaller font size for mobile
+          }
         },
       },
       x: {
-        ticks: { color: 'white' },
+        ticks: { 
+          color: 'white',
+          font: {
+            size: 10 // Smaller font size for mobile
+          }
+        },
         grid: { color: 'rgba(255, 255, 255, 0.1)' },
       },
     },
@@ -60,7 +78,7 @@ const Chart: React.FC<ChartProps> = ({ assets, colors }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 gap-6 sm:gap-8">
       {assets.map((asset, index) => {
         const data = {
           labels: ['Initial Value', 'Projected Value (5 Years)'],
@@ -76,7 +94,7 @@ const Chart: React.FC<ChartProps> = ({ assets, colors }) => {
         };
 
         return (
-          <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-lg">
+          <div key={index} className="bg-gray-800 p-4 rounded-lg shadow-lg">
             <Bar options={options} data={data} height={300} />
           </div>
         );

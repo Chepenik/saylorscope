@@ -8,9 +8,13 @@ import LogoModal from './LogoModal';
 const Header: React.FC = () => {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+  const [isTipModalOpen, setIsTipModalOpen] = useState(false);
 
   const openLogoModal = () => setIsLogoModalOpen(true);
   const closeLogoModal = () => setIsLogoModalOpen(false);
+
+  const openTipModal = () => setIsTipModalOpen(true);
+  const closeTipModal = () => setIsTipModalOpen(false);
 
   return (
     <>
@@ -34,11 +38,21 @@ const Header: React.FC = () => {
             About
           </button>
           <Link href="https://github.com/Chepenik/saylorscope" className="hover:text-gray-300 text-sm sm:text-base" target="_blank">Code</Link>
-          <TipButton />
+          <button
+            onClick={openTipModal}
+            className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-2 px-4 rounded-lg font-bold shadow-lg hover:from-yellow-500 hover:to-orange-600 transition duration-300 transform hover:scale-105"
+          >
+            Zap me ⚡
+          </button>
         </nav>
       </header>
-      <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+      <AboutModal 
+        isOpen={isAboutModalOpen} 
+        onClose={() => setIsAboutModalOpen(false)} 
+        onOpenTipModal={openTipModal}
+      />
       <LogoModal isOpen={isLogoModalOpen} onClose={closeLogoModal} />
+      <TipButton isOpen={isTipModalOpen} onClose={closeTipModal} />
     </>
   );
 };

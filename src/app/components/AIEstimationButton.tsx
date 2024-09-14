@@ -5,9 +5,10 @@ interface AIEstimationButtonProps {
   isLoading: boolean;
   estimationType: 'maintenance' | 'appreciation';
   disabled: boolean;
+  className?: string;
 }
 
-const AIEstimationButton: React.FC<AIEstimationButtonProps> = ({ onEstimate, isLoading, estimationType, disabled }) => {
+const AIEstimationButton: React.FC<AIEstimationButtonProps> = ({ onEstimate, isLoading, estimationType, disabled, className }) => {
   const handleClick = () => {
     onEstimate();
   };
@@ -16,13 +17,11 @@ const AIEstimationButton: React.FC<AIEstimationButtonProps> = ({ onEstimate, isL
     <button
       onClick={handleClick}
       className={`flex items-center justify-center text-white px-2 py-1 rounded transition-colors ${
-        isLoading
+        isLoading || disabled
           ? 'bg-gray-400 cursor-not-allowed'
-          : disabled
-          ? 'bg-gray-400 cursor-not-allowed' // Apply greyed-out styling when disabled
           : 'bg-blue-500 hover:bg-blue-600'
-      }`}
-      disabled={isLoading || disabled} // Disable the button if loading or explicitly disabled
+      } ${className}`}
+      disabled={isLoading || disabled}
     >
       {isLoading ? (
         <div className="flex items-center space-x-2">
@@ -46,7 +45,6 @@ const AIEstimationButton: React.FC<AIEstimationButtonProps> = ({ onEstimate, isL
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             ></path>
           </svg>
-          <span>Estimating...</span>
         </div>
       ) : (
         <span>AI</span>

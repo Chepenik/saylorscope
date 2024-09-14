@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import Chart from './Chart';
 import AssetInputForm from './AssetInputForm';
 import { estimateAssetDetails } from '../utils/assetEstimation';
@@ -13,6 +13,43 @@ const Calculator: React.FC = () => {
   const [estimationResult, setEstimationResult] = useState<string | null>(null);
   const [chartData, setChartData] = useState<AssetWithCalculations[]>([]);
   const [chartColors, setChartColors] = useState<Record<string, string>>({});
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Helper function to get a default color
+  const getDefaultColor = useCallback((index: number) => {
+    const defaultColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+    return defaultColors[index % defaultColors.length];
+  }, []);
+
+  // Use useEffect to set initial chart colors
+  useEffect(() => {
+    setChartColors(prevColors => {
+      const newChartColors: Record<string, string> = {...prevColors};
+      let shouldUpdate = false;
+
+      assets.forEach((asset, index) => {
+        const assetName = asset.name || `Unnamed Asset ${index + 1}`;
+        if (!newChartColors[assetName]) {
+          newChartColors[assetName] = getDefaultColor(index);
+          shouldUpdate = true;
+        }
+      });
+
+      return shouldUpdate ? newChartColors : prevColors;
+    });
+  }, [assets, getDefaultColor]);
+
+  // Check if the device is desktop
+  useEffect(() => {
+    const checkIsDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024); // Assuming 1024px as the breakpoint for desktop
+    };
+
+    checkIsDesktop();
+    window.addEventListener('resize', checkIsDesktop);
+
+    return () => window.removeEventListener('resize', checkIsDesktop);
+  }, []);
 
   const handleChange = useCallback((index: number, field: keyof Asset, value: string | number | null) => {
     updateAsset(index, field, value);
@@ -117,31 +154,21 @@ const Calculator: React.FC = () => {
     setChartData(results);
   }, [assets]);
 
-  const isDataEmpty = assets.length === 1 && !assets[0].name && !assets[0].value && !assets[0].maintenance && !assets[0].appreciation;
-
-  // Helper function to get a default color
-  const getDefaultColor = (index: number) => {
-    const defaultColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
-    return defaultColors[index % defaultColors.length];
+  const handleColorChange = (assetName: string, color: string) => {
+    setChartColors(prev => ({...prev, [assetName]: color}));
   };
 
-  // New useEffect hook to handle chart colors
-  useEffect(() => {
-    const newChartColors: Record<string, string> = {};
-    assets.forEach((asset, index) => {
-      const assetName = asset.name || `Unnamed Asset ${index + 1}`;
-      newChartColors[assetName] = chartColors[assetName] || getDefaultColor(index);
-    });
-    setChartColors(newChartColors);
-  }, [assets, chartColors]);
+  const isDataEmpty = assets.length === 1 && !assets[0].name && !assets[0].value && !assets[0].maintenance && !assets[0].appreciation;
 
   return (
     <div className="calculator min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-emerald-800 relative overflow-hidden">
       <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
-      <div className="relative z-10 max-w-4xl mx-auto p-8">
-        <div className="bg-black/30 backdrop-blur-lg p-8 rounded-lg shadow-2xl text-white">
-          <h1 className="text-3xl font-bold mb-6 text-center">SaylorScope</h1>
-          <div id="assetInputs" className="space-y-6">
+      <div className="relative z-10 max-w-4xl mx-auto p-4 sm:p-8">
+        <div className="bg-black/30 backdrop-blur-lg p-4 sm:p-8 rounded-lg shadow-2xl text-white">
+          <p className="text-sm sm:text-base mb-4 sm:mb-6 text-center">
+            Compare and analyze different types of assets over time. Input your asset details below and use AI to estimate maintenance costs and appreciation rates.
+          </p>
+          <div id="assetInputs" className="space-y-4 sm:space-y-6">
             {assets.map((asset, index) => (
               <AssetInputForm
                 key={index}
@@ -154,55 +181,55 @@ const Calculator: React.FC = () => {
             ))}
           </div>
           {estimationResult && (
-            <div className="mt-4 p-4 bg-black/50 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">AI Estimation Result</h3>
-              <pre className="whitespace-pre-wrap text-sm">{estimationResult}</pre>
+            <div className="mt-4 p-3 sm:p-4 bg-black/50 rounded-lg text-sm sm:text-base">
+              <h3 className="text-base sm:text-lg font-semibold mb-2">AI Estimation Result</h3>
+              <pre className="whitespace-pre-wrap">{estimationResult}</pre>
             </div>
           )}
           <button
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700 text-sm sm:text-base"
             onClick={addAsset}
             disabled={isDataEmpty || isAnyAILoading}
           >
             Add Another Asset
           </button>
           <button
-            className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700"
+            className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700 text-sm sm:text-base"
             onClick={calculateAndCompare}
             disabled={isDataEmpty || isAnyAILoading}
           >
             Calculate and Compare
           </button>
           <button
-            className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700"
+            className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 text-sm sm:text-base"
             onClick={clearAllAssets}
             disabled={isDataEmpty || isAnyAILoading}
           >
             Clear All Data
           </button>
-          <div className="result mt-8 p-4 bg-black/50 rounded-lg" dangerouslySetInnerHTML={{ __html: resultHTML }}></div>
+          <div className="result mt-6 sm:mt-8 p-3 sm:p-4 bg-black/50 rounded-lg text-sm sm:text-base" dangerouslySetInnerHTML={{ __html: resultHTML }}></div>
           {chartData.length > 0 && (
-            <div className="mt-8">
-              <h3 className="text-2xl font-bold mb-4 text-white">Asset Comparison Charts</h3>
+            <div className="mt-6 sm:mt-8">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">Asset Comparison Charts</h3>
               <Chart assets={chartData} colors={Object.values(chartColors)} />
-              <div className="mt-4">
-                <h4 className="text-xl font-bold mb-2 text-white">Customize Chart Colors</h4>
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(chartColors).map(([assetName, color], index) => (
-                    <div key={index} className="flex items-center">
-                      <input
-                        type="color"
-                        value={color}
-                        onChange={(e) => {
-                          setChartColors(prev => ({...prev, [assetName]: e.target.value}));
-                        }}
-                        className="w-10 h-10 rounded cursor-pointer mr-2"
-                      />
-                      <span className="text-white text-sm">{assetName}</span>
-                    </div>
-                  ))}
+              {isDesktop && (
+                <div className="mt-4">
+                  <h4 className="text-lg sm:text-xl font-bold mb-2 text-white">Customize Chart Colors</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(chartColors).map(([assetName, color], index) => (
+                      <div key={index} className="flex items-center mb-2">
+                        <input
+                          type="color"
+                          value={color}
+                          onChange={(e) => handleColorChange(assetName, e.target.value)}
+                          className="w-8 h-8 sm:w-10 sm:h-10 rounded cursor-pointer mr-2"
+                        />
+                        <span className="text-white text-xs sm:text-sm">{assetName}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
