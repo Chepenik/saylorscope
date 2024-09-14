@@ -3,25 +3,30 @@ import Image from 'next/image';
 import Link from 'next/link';
 import AboutModal from './AboutModal';
 import TipButton from './TipButton';
+import LogoModal from './LogoModal';
 
 const Header: React.FC = () => {
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
+
+  const openLogoModal = () => setIsLogoModalOpen(true);
+  const closeLogoModal = () => setIsLogoModalOpen(false);
 
   return (
     <>
       <header className="bg-gray-900 text-white py-2 px-4 sm:py-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center">
-        <Link href="/">
-          <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+        <div className="flex items-center space-x-2 mb-2 sm:mb-0 cursor-pointer" onClick={openLogoModal}>
+          <div className="relative w-[60px] h-[60px]">
             <Image
-              src="/SaylorScope.png"  // Make sure this path is correct
+              src="/SaylorScope.png"
               alt="SaylorScope Logo"
-              width={60}
-              height={60}
-              className="rounded-full"
+              fill
+              sizes="60px"
+              className="rounded-full object-cover"
             />
-            <span className="text-xl font-bold">SaylorScope</span>
           </div>
-        </Link>
+          <span className="text-xl font-bold">SaylorScope</span>
+        </div>
         <nav className="flex items-center space-x-4">
           <Link href="/" className="hover:text-gray-300 text-sm sm:text-base">Home</Link>
           <button 
@@ -34,6 +39,7 @@ const Header: React.FC = () => {
         </nav>
       </header>
       <AboutModal isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)} />
+      <LogoModal isOpen={isLogoModalOpen} onClose={closeLogoModal} />
     </>
   );
 };
