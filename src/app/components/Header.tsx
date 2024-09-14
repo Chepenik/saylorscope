@@ -13,7 +13,7 @@ const Header: React.FC = () => {
         <Link href="/">
           <div className="flex items-center space-x-2 mb-2 sm:mb-0">
             <Image
-              src="/SaylorScope.png"
+              src="/SaylorScope.png"  // Make sure this path is correct
               alt="SaylorScope Logo"
               width={60}
               height={60}
