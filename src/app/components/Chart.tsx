@@ -1,9 +1,13 @@
 import React from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ChartOptions } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { AssetWithCalculations } from '../../types/asset';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+// Disable all animations globally
+ChartJS.defaults.animation = false;
+ChartJS.defaults.transitions.active.animation.duration = 0;
 
 interface ChartProps {
   assets: AssetWithCalculations[];
@@ -11,7 +15,7 @@ interface ChartProps {
 }
 
 const Chart: React.FC<ChartProps> = ({ assets, colors }) => {
-  const options = {
+  const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -21,9 +25,16 @@ const Chart: React.FC<ChartProps> = ({ assets, colors }) => {
       },
       title: {
         display: true,
-        text: '5-Year Value Forecast', // Updated title here
+        text: '5-Year Value Forecast',
         color: 'white',
         font: { size: 20 },
+      },
+      tooltip: {
+        enabled: true,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        cornerRadius: 4,
       },
     },
     scales: {
@@ -41,6 +52,10 @@ const Chart: React.FC<ChartProps> = ({ assets, colors }) => {
         ticks: { color: 'white' },
         grid: { color: 'rgba(255, 255, 255, 0.1)' },
       },
+    },
+    hover: {
+      mode: 'nearest' as const,
+      intersect: true,
     },
   };
 

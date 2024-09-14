@@ -160,21 +160,21 @@ const Calculator: React.FC = () => {
             </div>
           )}
           <button
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700 transition duration-300"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700"
             onClick={addAsset}
             disabled={isDataEmpty || isAnyAILoading}
           >
             Add Another Asset
           </button>
           <button
-            className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700 transition duration-300"
+            className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700"
             onClick={calculateAndCompare}
             disabled={isDataEmpty || isAnyAILoading}
           >
             Calculate and Compare
           </button>
           <button
-            className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
+            className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700"
             onClick={clearAllAssets}
             disabled={isDataEmpty || isAnyAILoading}
           >
