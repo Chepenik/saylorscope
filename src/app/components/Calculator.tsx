@@ -89,7 +89,7 @@ const Calculator: React.FC = () => {
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      if (typeof error === 'object' && error !== null && 'rawResponse' in error) {
+      if (error instanceof Error && 'rawResponse' in error) {
         errorMessage += `\n\nRaw AI response: ${(error as any).rawResponse}`;
       }
       setEstimationResult(`Error: ${errorMessage}`);
@@ -154,9 +154,14 @@ const Calculator: React.FC = () => {
     setChartData(results);
   }, [assets]);
 
-  const handleColorChange = (assetName: string, color: string) => {
+  const handleColorChange = useCallback((assetName: string, color: string) => {
     setChartColors(prev => ({...prev, [assetName]: color}));
-  };
+  }, []);
+
+  // Memoize the chart colors array
+  const chartColorsArray = useMemo(() => {
+    return chartData.map(asset => chartColors[asset.name] || getDefaultColor(chartData.indexOf(asset)));
+  }, [chartData, chartColors, getDefaultColor]);
 
   const isDataEmpty = assets.length === 1 && !assets[0].name && !assets[0].value && !assets[0].maintenance && !assets[0].appreciation;
 
@@ -211,20 +216,20 @@ const Calculator: React.FC = () => {
           {chartData.length > 0 && (
             <div className="mt-6 sm:mt-8">
               <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-white">Asset Comparison Charts</h3>
-              <Chart assets={chartData} colors={Object.values(chartColors)} />
-              {isDesktop && (
+              <Chart assets={chartData} colors={chartColorsArray} />
+              {isDesktop && chartData.length > 0 && (
                 <div className="mt-4">
                   <h4 className="text-lg sm:text-xl font-bold mb-2 text-white">Customize Chart Colors</h4>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries(chartColors).map(([assetName, color], index) => (
+                    {chartData.map((asset, index) => (
                       <div key={index} className="flex items-center mb-2">
                         <input
                           type="color"
-                          value={color}
-                          onChange={(e) => handleColorChange(assetName, e.target.value)}
+                          value={chartColors[asset.name] || getDefaultColor(index)}
+                          onChange={(e) => handleColorChange(asset.name, e.target.value)}
                           className="w-8 h-8 sm:w-10 sm:h-10 rounded cursor-pointer mr-2"
                         />
-                        <span className="text-white text-xs sm:text-sm">{assetName}</span>
+                        <span className="text-white text-xs sm:text-sm">{asset.name || `Unnamed Asset ${index + 1}`}</span>
                       </div>
                     ))}
                   </div>
