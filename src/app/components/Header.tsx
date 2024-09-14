@@ -25,16 +25,15 @@ const Header: React.FC = () => {
               className="rounded-full object-cover"
             />
           </div>
-          <span className="text-xl font-bold">SaylorScope</span>
         </div>
         <nav className="flex items-center space-x-4">
-          <Link href="/" className="hover:text-gray-300 text-sm sm:text-base">Home</Link>
           <button 
             onClick={() => setIsAboutModalOpen(true)} 
             className="hover:text-gray-300 text-sm sm:text-base"
           >
             About
           </button>
+          <Link href="https://github.com/Chepenik/saylorscope" className="hover:text-gray-300 text-sm sm:text-base" target="_blank">Code</Link>
           <TipButton />
         </nav>
       </header>

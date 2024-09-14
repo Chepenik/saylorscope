@@ -5,7 +5,7 @@ export async function estimateAssetDetails(name: string, type: string, estimatio
   try {
     logger.info(`Sending request to local API for ${name} (${type}) - ${estimationType}`);
     
-    const response = await axios.post('/api/claude', {
+    const response = await axios.post('/api/estimate', {
       name,
       type,
       estimationType

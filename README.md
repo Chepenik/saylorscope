@@ -12,7 +12,7 @@ Ensure you have [Node.js](https://nodejs.org/en/) installed on your machine. Thi
 
 ### Installation
 
-Clone the repository and install the dependencies:
+1. Clone the repository and install the dependencies:
 
 ```bash
 git clone https://github.com/Chepenik/saylorscope.git

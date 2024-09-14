@@ -19,7 +19,7 @@ const LogoModal: React.FC<LogoModalProps> = ({ isOpen, onClose }) => {
         >
           <X size={24} />
         </button>
-        <h2 className="text-3xl font-bold mb-4">SaylorScope Logo</h2>
+        <h2 className="text-3xl font-bold mb-4">Logo</h2>
         <div className="relative w-full aspect-square mb-4">
           <Image
             src="/SaylorScope.png"
@@ -29,9 +29,6 @@ const LogoModal: React.FC<LogoModalProps> = ({ isOpen, onClose }) => {
             className="object-contain"
           />
         </div>
-        <p className="text-gray-300">
-          This is the official logo of SaylorScope, representing our commitment to financial analysis and Bitcoin education.
-        </p>
       </div>
     </div>
   );
