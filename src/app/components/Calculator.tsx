@@ -96,7 +96,7 @@ const Calculator: React.FC = () => {
       };
     });
   
-    let newResultHTML = "<h2 class='text-2xl font-bold mb-4 text-gray-800'>Analysis Results</h2>";
+    let newResultHTML = "<h2 class='text-2xl text-white font-bold mb-4 text-gray-800'>Analysis Results</h2>";
     results.forEach(asset => {
       newResultHTML += `
         <div class='mb-6 p-4 bg-gray-100 rounded-lg shadow-md'>

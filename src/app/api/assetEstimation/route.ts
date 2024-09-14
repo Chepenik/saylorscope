@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { estimateAssetDetails } from '@/app/utils/assetEstimation';
+import { estimateAssetDetails } from '../../utils/assetEstimation';
 
 export async function POST(request: Request) {
   try {
