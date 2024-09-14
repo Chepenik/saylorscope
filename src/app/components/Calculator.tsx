@@ -98,18 +98,41 @@ const Calculator: React.FC = () => {
     }
   }, [assets, updateAsset, setIsAnyAILoading]);
 
+  const calculateLifespan = (asset: Asset): string => {
+    const { value, maintenance, appreciation, type } = asset;
+    const safeValue = value ?? 0;
+    const safeAppreciation = appreciation ?? 0;
+    const monthlyAppreciation = (safeAppreciation / 100 / 12) * safeValue;
+    const monthlyMaintenance = maintenance || 0;
+    const monthlyNetGain = monthlyAppreciation - monthlyMaintenance;
+
+    if (monthlyNetGain > 0) {
+      switch (type) {
+        case 'physical':
+          return 'Long-term asset (30+ years with proper maintenance)';
+        case 'digital':
+          return 'Indefinite (subject to technological relevance)';
+        case 'financial':
+          return 'Indefinite (growing asset)';
+        default:
+          return 'Indefinite';
+      }
+    } else if (monthlyNetGain === 0) {
+      return 'Stable asset (maintains value with upkeep)';
+    } else {
+      // Asset is losing value
+      const monthsToZeroValue = safeValue / Math.abs(monthlyNetGain);
+      return `${(monthsToZeroValue / 12).toFixed(2)} years`;
+    }
+  };
+
   const calculateAndCompare = useCallback(() => {
     const results: AssetWithCalculations[] = assets.map(asset => {
       const value = asset.value ?? 0;
       const maintenance = asset.maintenance ?? 0;
       const appreciation = asset.appreciation ?? 0;
   
-      let lifespan = 'N/A';
-      if (maintenance > 0) {
-        lifespan = (value / maintenance / 12).toFixed(2) + ' years';
-      } else if (value > 0) {
-        lifespan = 'Indefinite';
-      }
+      const lifespan = calculateLifespan(asset);
   
       const annualCost = maintenance * 12;
       const annualReturn = (appreciation / 100) * value;
