@@ -4,14 +4,13 @@ import React, { useState, useRef, useCallback } from 'react';
 import Chart from 'chart.js/auto';
 import AssetInputForm from './AssetInputForm';
 import { estimateAssetDetails } from '../utils/assetEstimation';
-import Modal from './Modal';
 import { useAssets } from './AssetsContext';
 import { Asset, AssetWithCalculations } from '../../types/asset';
 
 const Calculator: React.FC = () => {
   const { assets, addAsset, updateAsset, clearAllAssets, isAnyAILoading, setIsAnyAILoading } = useAssets();
   const [resultHTML, setResultHTML] = useState<string>('');
-  const [modalContent, setModalContent] = useState<string | null>(null);
+  const [estimationResult, setEstimationResult] = useState<string | null>(null);
   const chartRef = useRef<Chart | null>(null);
   const chartCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -39,14 +38,14 @@ const Calculator: React.FC = () => {
           : `${estimatedDetails[estimationType]}% per year`;
       }
 
-      let modalContent = `Estimated ${estimationType} for ${asset.name} (${asset.type}):\n${estimateValue}\n\n`;
-      modalContent += `Explanation: ${estimatedDetails.explanation}`;
+      let result = `Estimated ${estimationType} for ${asset.name} (${asset.type}): ${estimateValue}\n\n`;
+      result += `Explanation: ${estimatedDetails.explanation}`;
 
       if (estimatedDetails.range) {
-        modalContent += `\n\nEstimated range: ${estimatedDetails.range[0]} to ${estimatedDetails.range[1]}`;
+        result += `\n\nEstimated range: ${estimatedDetails.range[0]} to ${estimatedDetails.range[1]}`;
       }
 
-      setModalContent(modalContent);
+      setEstimationResult(result);
     } catch (error) {
       console.error('Error estimating asset details:', error);
       let errorMessage = 'An unexpected error occurred while estimating asset details. Please try again.';
@@ -56,7 +55,7 @@ const Calculator: React.FC = () => {
       if (typeof error === 'object' && error !== null && 'rawResponse' in error) {
         errorMessage += `\n\nRaw AI response: ${(error as any).rawResponse}`;
       }
-      setModalContent(`Error: ${errorMessage}`);
+      setEstimationResult(`Error: ${errorMessage}`);
     } finally {
       setIsAnyAILoading(false);
     }
@@ -155,50 +154,54 @@ const Calculator: React.FC = () => {
   const isDataEmpty = assets.length === 1 && !assets[0].name && !assets[0].value && !assets[0].maintenance && !assets[0].appreciation;
 
   return (
-    <div className="calculator min-h-screen p-8 bg-gradient-to-br from-gray-100 via-gray-900 to-emerald-500">
-      <div className="max-w-4xl mx-auto bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-2xl">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">SaylorScope</h1>
-        <div id="assetInputs" className="space-y-6">
-          {assets.map((asset, index) => (
-            <AssetInputForm
-              key={index}
-              asset={asset}
-              index={index}
-              onChange={handleChange}
-              onAIEstimate={handleAIEstimate}
-              isAnyAILoading={isAnyAILoading}
-            />
-          ))}
+    <div className="calculator min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-emerald-800 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      <div className="relative z-10 max-w-4xl mx-auto p-8">
+        <div className="bg-black/30 backdrop-blur-lg p-8 rounded-lg shadow-2xl text-white">
+          <h1 className="text-3xl font-bold mb-6 text-center">SaylorScope</h1>
+          <div id="assetInputs" className="space-y-6">
+            {assets.map((asset, index) => (
+              <AssetInputForm
+                key={index}
+                asset={asset}
+                index={index}
+                onChange={handleChange}
+                onAIEstimate={handleAIEstimate}
+                isAnyAILoading={isAnyAILoading}
+              />
+            ))}
+          </div>
+          {estimationResult && (
+            <div className="mt-4 p-4 bg-black/50 rounded-lg">
+              <h3 className="text-lg font-semibold mb-2">AI Estimation Result</h3>
+              <pre className="whitespace-pre-wrap text-sm">{estimationResult}</pre>
+            </div>
+          )}
+          <button
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700 transition duration-300"
+            onClick={addAsset}
+            disabled={isDataEmpty || isAnyAILoading}
+          >
+            Add Another Asset
+          </button>
+          <button
+            className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700 transition duration-300"
+            onClick={calculateAndCompare}
+            disabled={isDataEmpty || isAnyAILoading}
+          >
+            Calculate and Compare
+          </button>
+          <button
+            className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
+            onClick={clearAllAssets}
+            disabled={isDataEmpty || isAnyAILoading}
+          >
+            Clear All Data
+          </button>
+          <div className="result mt-8 p-4 bg-black/50 rounded-lg" dangerouslySetInnerHTML={{ __html: resultHTML }}></div>
+          <canvas className="mt-8" id="comparisonChart" ref={chartCanvasRef}></canvas>
         </div>
-        <button
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded mt-4 hover:bg-blue-700 transition duration-300"
-          onClick={addAsset}
-          disabled={isDataEmpty || isAnyAILoading}
-        >
-          Add Another Asset
-        </button>
-        <button
-          className="w-full bg-green-600 text-white py-2 px-4 rounded mt-4 hover:bg-green-700 transition duration-300"
-          onClick={calculateAndCompare}
-          disabled={isDataEmpty || isAnyAILoading}
-        >
-          Calculate and Compare
-        </button>
-        <button
-          className="w-full bg-red-600 text-white py-2 px-4 rounded mt-4 hover:bg-red-700 transition duration-300"
-          onClick={clearAllAssets}
-          disabled={isDataEmpty || isAnyAILoading}
-        >
-          Clear All Data
-        </button>
-        <div className="result mt-8 p-4 bg-white rounded-lg shadow-md" dangerouslySetInnerHTML={{ __html: resultHTML }}></div>
-        <canvas className="mt-8" id="comparisonChart" ref={chartCanvasRef}></canvas>
       </div>
-      {modalContent && (
-        <Modal onClose={() => setModalContent(null)}>
-          <p>{modalContent}</p>
-        </Modal>
-      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface AIEstimationButtonProps {
   onEstimate: () => Promise<void>;
@@ -55,4 +55,4 @@ const AIEstimationButton: React.FC<AIEstimationButtonProps> = ({ onEstimate, isL
   );
 };
 
-export default AIEstimationButton;
+export default memo(AIEstimationButton);

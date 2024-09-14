@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import QRCode from 'qrcode.react';
 import { Copy, ExternalLink, X } from 'lucide-react';
+import { logger } from '../utils/logger';
 
 const TipButton: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -12,8 +13,11 @@ const TipButton: React.FC = () => {
   const closeModal = () => setIsModalOpen(false);
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert('BTC Address copied to clipboard');
+    navigator.clipboard.writeText(text).then(() => {
+      logger.info('BTC Address copied to clipboard');
+    }).catch((error) => {
+      logger.error('Failed to copy BTC Address', error);
+    });
   };
 
   return (
@@ -26,11 +30,12 @@ const TipButton: React.FC = () => {
       </button>
       
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" role="dialog" aria-modal="true">
           <div className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full relative overflow-hidden text-white">
             <button
               className="absolute top-2 right-2 text-gray-300 hover:text-white"
               onClick={closeModal}
+              aria-label="Close modal"
             >
               <X size={24} />
             </button>
