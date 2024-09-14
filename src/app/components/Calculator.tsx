@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from 'react';
-import Chart from 'chart.js/auto';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import Chart from './Chart';
 import AssetInputForm from './AssetInputForm';
 import { estimateAssetDetails } from '../utils/assetEstimation';
 import { useAssets } from './AssetsContext';
@@ -11,8 +11,8 @@ const Calculator: React.FC = () => {
   const { assets, addAsset, updateAsset, clearAllAssets, isAnyAILoading, setIsAnyAILoading } = useAssets();
   const [resultHTML, setResultHTML] = useState<string>('');
   const [estimationResult, setEstimationResult] = useState<string | null>(null);
-  const chartRef = useRef<Chart | null>(null);
-  const chartCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [chartData, setChartData] = useState<AssetWithCalculations[]>([]);
+  const [chartColors, setChartColors] = useState<Record<string, string>>({});
 
   const handleChange = useCallback((index: number, field: keyof Asset, value: string | number | null) => {
     updateAsset(index, field, value);
@@ -96,62 +96,44 @@ const Calculator: React.FC = () => {
       };
     });
   
-    let newResultHTML = "<h2 class='text-2xl text-white font-bold mb-4 text-gray-800'>Analysis Results</h2>";
+    let newResultHTML = "<h2 class='text-2xl text-white font-bold mb-4'>Analysis Results</h2>";
     results.forEach(asset => {
       newResultHTML += `
-        <div class='mb-6 p-4 bg-gray-100 rounded-lg shadow-md'>
-          <h3 class='text-xl font-semibold mb-2 text-gray-800'>${asset.name || 'Unnamed Asset'} (${asset.type})</h3>
-          <p class='text-gray-700'>Initial Value: $${asset.value ?? 0}</p>
-          <p class='text-gray-700'>Lifespan: ${asset.lifespan}</p>
-          <p class='text-gray-700'>Annual Maintenance Cost: $${asset.annualCost}</p>
-          <p class='text-gray-700'>Annual ${Number(asset.appreciation) >= 0 ? 'Return' : 'Loss'}: $${asset.annualReturn}</p>
-          <p class='text-gray-700'>ROI: ${asset.roi}%</p>
-          ${Number(asset.appreciation) > 0 ? `<p class='text-gray-700'>Time it takes to double your money: ${asset.doubleYourMoneyTime}</p>` : ''}
-          <p class='text-gray-700'>5-year projected value: $${asset.projectedValue}</p>
+        <div class='mb-6 p-4 bg-gray-700 rounded-lg shadow-md text-white'>
+          <h3 class='text-xl font-semibold mb-2'>${asset.name || 'Unnamed Asset'} (${asset.type})</h3>
+          <p>Initial Value: $${asset.value?.toLocaleString() ?? 0}</p>
+          <p>Lifespan: ${asset.lifespan}</p>
+          <p>Annual Maintenance Cost: $${parseFloat(asset.annualCost || '0').toLocaleString()}</p>
+          <p>Annual ${Number(asset.appreciation) >= 0 ? 'Return' : 'Loss'}: $${parseFloat(asset.annualReturn || '0').toLocaleString()}</p>
+          <p>ROI: ${asset.roi}%</p>
+          ${Number(asset.appreciation) > 0 ? `<p>Time to double your money: ${asset.doubleYourMoneyTime}</p>` : ''}
+          <p>5-year projected value: $${parseFloat(asset.projectedValue || '0').toLocaleString()}</p>
         </div>
       `;
     });
     setResultHTML(newResultHTML);
-  
-    if (chartRef.current) {
-      chartRef.current.destroy();
-    }
-  
-    if (chartCanvasRef.current) {
-      chartRef.current = new Chart(chartCanvasRef.current, {
-        type: 'bar',
-        data: {
-          labels: results.map(a => `${a.name || 'Unnamed Asset'} (${a.type})`),
-          datasets: [
-            {
-              label: 'Initial Value',
-              data: results.map(a => a.value ?? 0),
-              backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            },
-            {
-              label: '5-Year Projected Value',
-              data: results.map(a => parseFloat(a.projectedValue ?? '0')),
-              backgroundColor: 'rgba(255, 206, 86, 0.5)',
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Value ($)',
-              },
-            },
-          },
-        },
-      });
-    }
+    
+    // Update chart data
+    setChartData(results);
   }, [assets]);
 
   const isDataEmpty = assets.length === 1 && !assets[0].name && !assets[0].value && !assets[0].maintenance && !assets[0].appreciation;
+
+  // Helper function to get a default color
+  const getDefaultColor = (index: number) => {
+    const defaultColors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+    return defaultColors[index % defaultColors.length];
+  };
+
+  // New useEffect hook to handle chart colors
+  useEffect(() => {
+    const newChartColors: Record<string, string> = {};
+    assets.forEach((asset, index) => {
+      const assetName = asset.name || `Unnamed Asset ${index + 1}`;
+      newChartColors[assetName] = chartColors[assetName] || getDefaultColor(index);
+    });
+    setChartColors(newChartColors);
+  }, [assets, chartColors]);
 
   return (
     <div className="calculator min-h-screen bg-gradient-to-br from-gray-900 via-gray-700 to-emerald-800 relative overflow-hidden">
@@ -199,7 +181,30 @@ const Calculator: React.FC = () => {
             Clear All Data
           </button>
           <div className="result mt-8 p-4 bg-black/50 rounded-lg" dangerouslySetInnerHTML={{ __html: resultHTML }}></div>
-          <canvas className="mt-8" id="comparisonChart" ref={chartCanvasRef}></canvas>
+          {chartData.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-2xl font-bold mb-4 text-white">Asset Comparison Charts</h3>
+              <Chart assets={chartData} colors={Object.values(chartColors)} />
+              <div className="mt-4">
+                <h4 className="text-xl font-bold mb-2 text-white">Customize Chart Colors</h4>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(chartColors).map(([assetName, color], index) => (
+                    <div key={index} className="flex items-center">
+                      <input
+                        type="color"
+                        value={color}
+                        onChange={(e) => {
+                          setChartColors(prev => ({...prev, [assetName]: e.target.value}));
+                        }}
+                        className="w-10 h-10 rounded cursor-pointer mr-2"
+                      />
+                      <span className="text-white text-sm">{assetName}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
