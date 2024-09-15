@@ -43,10 +43,10 @@ const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose, onOpenTipModal
             As an open-source project, we encourage you to hack, build upon, and improve SaylorScope. Your contributions can help make this tool even more valuable for the community.
           </p>
           <p>
-            If you find SaylorScope useful, consider supporting its development by using the <a href="#" onClick={handleTipButtonClick} className="text-blue-400 hover:text-blue-300 underline">&quot;Zap Me&quot;</a> button in the header. Your sats help us maintain and improve the tool. Remember, every sat counts!
+            If you find SaylorScope useful, consider supporting its development by using the <a href="#" onClick={handleTipButtonClick} className="text-blue-400 hover:text-blue-300 underline">&quot;Zap Me&quot;</a> button in the header. Your sats help us maintain and improve the tool. Thank you!
           </p>
           <p className="font-semibold">
-            We love Bitcoin and believe in its potential to change the world. By providing tools like SaylorScope, we hope to contribute to a future of sound money and financial sovereignty.
+          We are passionate about Bitcoin and its transformative potential for the world. Through tools like SaylorScope, we aspire to foster a future of sound money, abundance, & enhanced financial sovereignty through more educational resources.
           </p>
         </div>
       </div>
